@@ -1,0 +1,47 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+-- Function to apply a highlight to a character
+local function highlightCharacter(character)
+	if character and not character:FindFirstChild("Highlight") then
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "Highlight"
+		highlight.FillColor = Color3.fromRGB(255, 255, 0) -- Yellow fill
+		highlight.OutlineColor = Color3.fromRGB(255, 0, 0) -- Red outline
+		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+		highlight.Parent = character
+	end
+end
+
+-- Apply highlight to all current players
+for _, player in ipairs(Players:GetPlayers()) do
+	if player ~= Players.LocalPlayer and player.Character then
+		highlightCharacter(player.Character)
+	end
+end
+
+-- Handle new characters being added
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(character)
+		-- Delay to ensure character is fully loaded
+		wait(1)
+		highlightCharacter(character)
+	end)
+end)
+
+-- In case characters respawn
+for _, player in ipairs(Players:GetPlayers()) do
+	player.CharacterAdded:Connect(function(character)
+		wait(1)
+		highlightCharacter(character)
+	end)
+end
+
+-- Optional: Update highlight in real-time (useful if players join late)
+RunService.Heartbeat:Connect(function()
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= Players.LocalPlayer and player.Character then
+			highlightCharacter(player.Character)
+		end
+	end
+end)
