@@ -1,0 +1,37 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local localPlayer = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+-- Function to get the nearest player (360° around you)
+local function getNearestPlayer()
+	local shortestDistance = math.huge
+	local nearestPlayer = nil
+	local myCharacter = localPlayer.Character
+	if not myCharacter or not myCharacter:FindFirstChild("HumanoidRootPart") then return end
+
+	local myPosition = myCharacter.HumanoidRootPart.Position
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			local targetPosition = player.Character.HumanoidRootPart.Position
+			local distance = (targetPosition - myPosition).Magnitude
+			if distance < shortestDistance then
+				shortestDistance = distance
+				nearestPlayer = player
+			end
+		end
+	end
+
+	return nearestPlayer
+end
+
+-- Continuously rotate the camera to look at the nearest player
+RunService.RenderStepped:Connect(function()
+	local targetPlayer = getNearestPlayer()
+	if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+		camera.CFrame = CFrame.new(camera.CFrame.Position, targetPosition)
+	end
+end)
